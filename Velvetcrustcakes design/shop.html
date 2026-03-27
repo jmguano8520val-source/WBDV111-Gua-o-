@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rich's  Crust Cakes | Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">Rich's Crust</div>
+        <div class="nav-links">
+            <a href="index.html" class="btn-cream">Home</a>
+            <a href="shop.html" class="btn-cream">Shop</a>
+            <a href="summary.html" class="btn-cream">Cart (<span id="cart-count">0</span>)</a>
+            <a href="login.html" class="btn-cream" style="background:transparent; border:1px solid var(--cream); color:white;">Login</a>
+        </div>
+    </nav>
+
+    <div id="cart-modal" class="modal-overlay">
+        <div class="container" style="max-width: 400px; text-align: center;">
+            <h2 id="modal-title">Confirm Selection</h2>
+            <p id="modal-msg"></p>
+            <div id="qty-box" style="display:none; margin: 20px;">
+                <label>Quantity: </label>
+                <input type="number" id="item-qty" value="1" min="1" style="width: 60px; padding: 5px;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="modal-yes" class="btn-cream" style="flex:1">Yes</button>
+                <button id="modal-no" class="btn-cream" style="flex:1; background:rgba(255,255,255,0.2); color:white;">No</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <section id="shop" class="page">
+            <h2 style="margin-bottom: 30px;">Our Full Collection</h2>
+            <div class="grid" id="full-grid"></div>
+        </section>
+
+   
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const orderItemsTableBody = document.querySelector('#order-items-table tbody');
+    const orderSubtotalSpan = document.getElementById('order-subtotal');
+    const orderShippingSpan = document.getElementById('order-shipping');
+    const orderTotalSpan = document.getElementById('order-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+
+    // Mga halimbawang data ng items (sa totoong app, ito ay manggagaling sa cart o backend)
+    let orderItems = [
+        { id: 1, name: 'Sample Product 1', price: 10.00, qty: 1 },
+        { id: 2, name: 'Sample Product 2', price: 10.00, qty: 2 }
+    ];
+
+    // Function para i-render ang table at i-update ang totals
+    function renderOrderSummary() {
+        orderItemsTableBody.innerHTML = ''; // Clear existing rows
+
+        let currentSubtotal = 0;
+
+        orderItems.forEach(item => {
+            const row = document.createElement('tr');
+            const itemSubtotal = item.price * item.qty;
+            currentSubtotal += itemSubtotal;
+
+            row.innerHTML = `
+                <td>${item.name}</td>
+                <td>
+                    <input type="number" value="${item.qty}" min="1" class="item-qty" data-item-id="${item.id}">
+                </td>
+                <td class="item-subtotal">$${itemSubtotal.toFixed(2)}</td>
+                <td>
+                    <button class="remove-item-btn" data-item-id="${item.id}">Remove</button>
+                </td>
+            `;
+            orderItemsTableBody.appendChild(row);
+        });
+
+        // Update totals
+        const shippingCost = 5.00; // Halimbawang shipping cost
+        orderSubtotalSpan.textContent = `$${currentSubtotal.toFixed(2)}`;
+        orderShippingSpan.textContent = `$${shippingCost.toFixed(2)}`;
+        orderTotalSpan.textContent = `$${(currentSubtotal + shippingCost).toFixed(2)}`;
+    }
+
+    // Event listener para sa pagbabago ng quantity
+    orderItemsTableBody.addEventListener('change', (event) => {
+        if (event.target.classList.contains('item-qty')) {
+            const itemId = parseInt(event.target.dataset.itemId);
+            const newQty = parseInt(event.target.value);
+
+            const itemToUpdate = orderItems.find(item => item.id === itemId);
+            if (itemToUpdate) {
+                itemToUpdate.qty = newQty;
+                renderOrderSummary(); // Re-render the table and totals
+            }
+        }
+    });
+
+    // Event listener para sa pag-remove ng item
+    orderItemsTableBody.addEventListener('click', (event) => {
+        if (event.target.classList.contains('remove-item-btn')) {
+            const itemId = parseInt(event.target.dataset.itemId);
+            orderItems = orderItems.filter(item => item.id !== itemId);
+            renderOrderSummary(); // Re-render the table and totals
+        }
+    });
+
+    // Event listener para sa checkout button
+    checkoutBtn.addEventListener('click', () => {
+        alert('Proceeding to checkout!');
+        // Dito mo ilalagay ang logic para sa redirection o pag-submit ng order
+    });
+
+    // Initial render ng summary pagka-load ng page
+    renderOrderSummary();
+});
+
